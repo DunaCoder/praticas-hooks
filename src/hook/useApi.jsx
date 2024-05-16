@@ -1,42 +1,32 @@
-//customHook para una api
-//en este caso usare axios
-
-//importamos useState y effect
-import { useState} from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react';
 
 const useApi = () => {
-    //siempre se deben crear estos estados para una api
-    const [data, setData] = useState({
-        pokemon: ''
-    })
+  const [data, setData] = useState(null); // Estado para almacenar los datos del Pokémon
+  const [loading, setLoading] = useState(false); // Estado para indicar si se está cargando la información
+  const [error, setError] = useState(''); // Estado para almacenar mensajes de error
 
-    const datosBusqueda = (e) => {
-       setData(e.target.value);
-      };
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+  const consultarApi = async (pokemonName) => { // Función para consultar la API
+    setLoading(true); // Indica que se está cargando la información
+    setError(''); // Borra cualquier mensaje de error anterior
 
-    //usamos effect y 
-  
-    const consultarApi = async (datos) =>{
-            //aqui se hara la llamada
-            const {pokemon} = datos
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`); // Realiza la petición a la API
+      const pokemonData = await response.json(); // Convierte la respuesta a JSON
 
-            const url = `https://pokeapi.co/api/v2/pokemon/${pokemon}`
-            try{
-                setLoading(true)
-                const respuesta = await axios (url)
-                setData(respuesta.data)
-                setLoading(false)
-            }catch(err){
-                //este se ejecuta cuando falla la llamada
-                setError(err)
-                setLoading(false)
-            }
-        }
+      if (response.ok) { // Verifica si la petición fue exitosa
+        setData(pokemonData); // Almacena los datos del Pokémon en el estado
+        console.log(data)
+      } else {
+        setError('Error al buscar el Pokémon'); // Establece un mensaje de error
+      }
+    } catch (err) {
+      setError('Error al conectar con la API'); // Establece un mensaje de error general
+    } finally {
+      setLoading(false); // Indica que la carga ha finalizado
+    }
+  };
 
-  return{data, loading, error, consultarApi, datosBusqueda}
-}
+  return { data, loading, error, consultarApi }; // Devuelve los estados y la función consultarApi
+};
 
-export default useApi
+export default useApi;
